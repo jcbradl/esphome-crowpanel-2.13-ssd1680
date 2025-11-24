@@ -5,7 +5,7 @@
 #include "esphome/core/hal.h"
 
 namespace esphome {
-namespace crowpanel_epaper_2in13 {
+namespace crowpanel_epaper {
 
 static const uint8_t COMMAND_END_MARKER = 0xFF;
 static const uint8_t DELAY_FLAG = 0x80;
