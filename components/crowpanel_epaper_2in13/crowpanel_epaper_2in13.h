@@ -12,7 +12,7 @@ static const uint8_t DELAY_FLAG = 0x80;
 static const uint8_t ARG_COUNT_MASK = 0x7F;
 
 static const uint16_t NATIVE_WIDTH_2IN13 = 250; 
-static const uint16_t NATIVE_HEIGHT_2IN13 = 120;
+static const uint16_t NATIVE_HEIGHT_2IN13 = 122;
 
 enum class EpdState {
   IDLE,
