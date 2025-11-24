@@ -4,7 +4,7 @@
 #include "esphome/core/helpers.h"
 
 namespace esphome {
-namespace crowpanel_epaper {
+namespace crowpanel_epaper_2in13 {
 
 static const char *const TAG = "crowpanel_epaper";
 
