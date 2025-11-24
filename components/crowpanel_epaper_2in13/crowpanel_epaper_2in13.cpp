@@ -49,7 +49,7 @@ const uint8_t display_start_sequence_2in13[] = {
   CMD_DATA_ENTRY_MODE, 0x01, 0x03,                          // something else
   CMD_SET_X_ADDR, 0x02, 0x00, 0x0F,                          // x
   CMD_SET_Y_ADDR, 0x04, 0x00, 0xF9, 0x00,                    // ramy 
-  CMD_BORDER_WAVEFORM, 0x3C, 0x01, 0x01,
+  CMD_BORDER_WAVEFORM, 0x01, 0x01,
   CMD_SET_TEMP_SENSOR, 0x01, 0x80,
   CMD_SET_X_COUNTER, 0x01, 0x00,
   CMD_SET_Y_COUNTER, 0x02, 0x00, 0x00,
