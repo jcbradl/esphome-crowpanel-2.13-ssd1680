@@ -148,27 +148,6 @@ enum class EpdCascadeState {
   SECONDARY,
 };
 
-class CrowPanelEPaper5P79In : public CrowPanelEPaper {
- public:
-  void initialize() override;
-  void display() override;
-  void dump_config() override;
-  void deep_sleep() override;
-  
- protected:
-  EpdCascadeState cascade_state_{EpdCascadeState::PRIMARY};
-  // We use 2-dimensional addressing to stay sane.
-  // data_send_index_ is the y index.
-  uint32_t data_send_x_offset_{0};
-
-  uint32_t idle_timeout_() override { return 60000u; }
-  int get_width_controller() override { return NATIVE_WIDTH_5P79IN; }
-  int get_native_width_() override { return NATIVE_WIDTH_5P79IN; }
-  int get_native_height_() override { return NATIVE_HEIGHT_5P79IN; }
-
-  void prepare_for_update_(UpdateMode mode);
-  void update_send_data_(uint32_t now) override;
-};
 
 }  // namespace crowpanel_epaper
 }  // namespace esphome
