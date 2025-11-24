@@ -469,8 +469,12 @@ void CrowPanelEPaperBase::dump_config() {
 }
 
 uint32_t CrowPanelEPaperBase::get_buffer_length_() {
-  return this->get_width_internal() * this->get_height_internal() / 8u;
+  uint32_t width = this->get_width_internal();
+  uint32_t height = this->get_height_internal();
+  uint32_t row_bytes = (width % 8 == 0) ? (width / 8) : (width / 8 + 1);
+  return row_bytes * height;
 }
+
 
 // ========================================================
 // CrowPanelEPaper Implementation (Basic B/W display)
