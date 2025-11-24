@@ -30,8 +30,8 @@ static const uint8_t CMD_TARGET_SECONDARY = 0x80;
 // SSD1683 EPD Driver chip command parameters
 static const uint8_t PARAM_BORDER_FULL = 0x05;
 static const uint8_t PARAM_BORDER_PARTIAL = 0x80;
-#static const uint8_t PARAM_FULL_UPDATE = 0xF7;
-#static const uint8_t PARAM_PARTIAL_UPDATE = 0xFF;
+// static const uint8_t PARAM_FULL_UPDATE = 0xF7;
+// static const uint8_t PARAM_PARTIAL_UPDATE = 0xFF;
 static const uint8_t PARAM_FULL_UPDATE = 0xF4;
 static const uint8_t PARAM_PARTIAL_UPDATE = 0xFC;
 static const uint8_t PARAM_DEEP_SLEEP_MODE = 0x01;
