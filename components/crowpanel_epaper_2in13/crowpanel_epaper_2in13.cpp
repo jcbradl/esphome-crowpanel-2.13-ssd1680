@@ -4,7 +4,7 @@
 #include "esphome/core/helpers.h"
 
 namespace esphome {
-namespace crowpanel_epaper_2in13 {
+namespace crowpanel_epaper {
 
 static const char *const TAG = "crowpanel_epaper";
 
@@ -618,147 +618,7 @@ void CrowPanelEPaper2in13::dump_config() {
   LOG_UPDATE_INTERVAL(this);
 }
 
-// ========================================================================
-// CrowPanelEPaper5P79In Implementation (5.79" B/W display)
-//
-// This model uses the cascade mode of the SSD1683 to chain two controllers
-// together. The left half (closest to the connector) is the primary
-// controller.
-// ========================================================================
 
-void CrowPanelEPaper5P79In::initialize() {
-  ESP_LOGD(TAG, "Initializing CrowPanel 5.79in display");
-
-  // Send initialization sequence using the predefined commands
-  this->send_command_sequence_(display_start_sequence_5p79in);
-}
-
-void CrowPanelEPaper5P79In::prepare_for_update_(UpdateMode mode) {
-  if (mode == UpdateMode::FULL) {
-    ESP_LOGD(TAG, "Preparing for FULL update mode");
-    
-    // Set BorderWavefrom for full refresh
-    this->command(CMD_BORDER_WAVEFORM);
-    this->data(PARAM_BORDER_FULL);
-    
-    // Additional display update control settings 
-    this->command(CMD_DISPLAY_UPDATE_CONTROL);
-    this->data(0x40);
-    this->data(PARAM_SEL_CASCADE);
-  } else {
-    ESP_LOGD(TAG, "Preparing for PARTIAL update mode");
-    
-    // Set BorderWavefrom for partial refresh
-    this->command(CMD_BORDER_WAVEFORM);
-    this->data(PARAM_BORDER_PARTIAL);
-    
-    // Additional settings for partial update
-    this->command(CMD_DISPLAY_UPDATE_CONTROL);
-    this->data(0x00);
-    this->data(PARAM_SEL_CASCADE);
-  }
-}
-
-void CrowPanelEPaper5P79In::display() {
-  ESP_LOGD(TAG, "E-Paper display refresh starting");
-  // Set the display mode based on update type
-  UpdateMode mode = this->is_full_update_ ? UpdateMode::FULL : UpdateMode::PARTIAL;
-  this->prepare_for_update_(mode);
-  // Reset RAM address counters before writing data
-  // Primary controller (start from top-left)
-  this->command(CMD_SET_X_COUNTER | CMD_TARGET_PRIMARY);
-  this->data(0x00);
-  this->command(CMD_SET_Y_COUNTER| CMD_TARGET_PRIMARY);
-  this->data(0x00);
-  this->data(0x00);
-  // Secondary controller (start from top-right)
-  this->command(CMD_SET_X_COUNTER | CMD_TARGET_SECONDARY);
-  this->data(0x31); // 49b -> 400px
-  this->command(CMD_SET_Y_COUNTER | CMD_TARGET_SECONDARY);
-  this->data(0x00);
-  this->data(0x00);
-
-  // Start by filling the primary controller's RAM
-  this->cascade_state_ = EpdCascadeState::PRIMARY;
-  this->data_send_index_ = 0;
-  this->data_send_x_offset_ = 0;
-  this->command(CMD_WRITE_RAM | CMD_TARGET_PRIMARY);
-  this->start_data_();
-}
-
-void CrowPanelEPaper5P79In::update_send_data_(uint32_t now) {
-  // We can easily send 2 rows of data without exceeding the 30ms limit.
-  constexpr size_t chunk_size = 2u * (NATIVE_WIDTH_5P79IN / 2u);
-  constexpr uint16_t width_bytes = NATIVE_WIDTH_5P79IN / 8u;
-  // It's important to round up here!
-  constexpr uint16_t x_offset_end = (width_bytes + 1u) / 2u;
-  // And here it's important to round down.
-  constexpr uint16_t x_offset_start = width_bytes / 2u;
-
-  // The logic here is slightly more complex than for the 4.2in display because we have to deal
-  // with two controllers, each with its own buffer. Worse, they even have an overlap in the middle.
-  // Luckily for us, we can just write the 8-bit overlap data to both controllers and it will work
-  // fine. That's why the rounding is important above.
-  //
-  // The rest is a pretty straight-forward 2D traversal of the buffer. We do it in 2 dimensions
-  // because the buffer's layout would force us to switch controllers right in the middle of a row,
-  // which is not ideal. Instead we first write the left half of the buffer to the primary
-  // controller, then switch to the secondary controller and write the right half of the buffer.
-
-  // For the secondary controller, read from the right half of the buffer.
-  uint16_t x_start = (this->cascade_state_ == EpdCascadeState::PRIMARY) ? 0 : x_offset_start;
-
-  bool done = false;
-  for (size_t i = 0; i < chunk_size; ++i) {
-    size_t index = this->data_send_index_ * width_bytes + x_start + this->data_send_x_offset_;
-    assert(index < this->get_buffer_length_());
-    this->write_byte_soft_spi(this->buffer_[index]);
-
-    ++this->data_send_x_offset_;
-    if (this->data_send_x_offset_ >= x_offset_end) {
-      this->data_send_x_offset_ = 0u;
-      ++this->data_send_index_;
-      if (this->data_send_index_ >= this->get_native_height_()) {
-        done = true;
-        break;
-      }
-    }
-  }
-  // Still writing data...
-  if (!done) return;
-
-  // The current transfer is done.
-  this->end_data_();
-  if (this->cascade_state_ == EpdCascadeState::PRIMARY) {
-    // We finished the primary controller's data, let's switch to the secondary controller.
-    this->cascade_state_ = EpdCascadeState::SECONDARY;
-    this->data_send_index_ = 0;
-    this->data_send_x_offset_ = 0;
-    this->command(CMD_WRITE_RAM | CMD_TARGET_SECONDARY);
-    this->start_data_();
-    return;
-  }
-
-  // We're done with both controllers.
-  this->state_ = EpdState::UPDATE_REFRESH;
-  this->state_start_time_ = now;
-}
-
-void CrowPanelEPaper5P79In::deep_sleep() {
-  ESP_LOGD(TAG, "Entering deep sleep mode");
-  
-  // Send deep sleep sequence
-  this->send_command_sequence_(display_stop_sequence);
-}
-
-void CrowPanelEPaper5P79In::dump_config() {
-  LOG_DISPLAY("", "CrowPanel E-Paper", this);
-  ESP_LOGCONFIG(TAG, "  Model: 5.79in");
-  LOG_PIN("  Reset Pin: ", this->reset_pin_);
-  LOG_PIN("  DC Pin: ", this->dc_pin_);
-  LOG_PIN("  Busy Pin: ", this->busy_pin_);
-  LOG_UPDATE_INTERVAL(this);
-}
 
 }  // namespace crowpanel_epaper
 }  // namespace esphome
