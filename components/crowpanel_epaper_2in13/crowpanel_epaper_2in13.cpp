@@ -43,32 +43,41 @@ static const uint8_t PARAM_SEL_CASCADE = 0x10;
 // Special case: if num_args has bit 7 set (0x80), it indicates a delay command
 // End marker is two 0xFF bytes
 
-const uint8_t display_start_sequence[] = {
+const uint8_t display_start_sequence_2in13[] = {
   CMD_SOFT_RESET,                                                // Soft reset
-  CMD_SET_MUX, 0x03, 0x2b, 0x01, 0x00,                           // Set MUX as 300
-  CMD_DISPLAY_UPDATE_CONTROL, 0x02, 0x40, PARAM_SEL_SINGLE_CHIP, // Display update control
-  CMD_BORDER_WAVEFORM, 0x01, PARAM_BORDER_FULL,                  // Border waveform for full refresh
-  CMD_DATA_ENTRY_MODE, 0x01, PARAM_X_INC_Y_INC,                  // Data entry mode (X+ Y+)
-  CMD_SET_X_ADDR, 0x02, 0x00, 0x31,                              // Set RAM X Address Start/End Pos (0 to 49 -> 400 pixels)
-  CMD_SET_Y_ADDR, 0x04, 0x00, 0x00, 0x2b, 0x01,                  // Set RAM Y Address Start/End Pos (0 to 299 -> 300 pixels)
-  CMD_SET_X_COUNTER, 0x01, 0x00,                                 // Set RAM X Address counter
-  CMD_SET_Y_COUNTER, 0x02, 0x00, 0x00,                           // Set RAM Y Address counter
-  COMMAND_END_MARKER, COMMAND_END_MARKER                         // End marker
+  CMD_SET_MUX, 0x03, 0xF9, 0x00, 0x00                            // Set MUX as 250
+  CMD_DATA_ENTRY_MODE, 0x01, 0x03                          // something else
+  CMD_SET_X_ADDR, 0x02, 0x00, 0x0F                          // x
+  CMD_SET_Y_ADDR, 0x04, 0x00, 0xF9, 0x00                    // ramy 
+  CMD_BORDER_WAVEFORM, 0x3C, 0x01, 0x01
+  CMD_SET_TMEP_SENSOR, 0x01, 0x80
+  CMD_SET_X_COUNTER, 0x01, 0x00
+  CMD_SET_Y_COUNTER, 0x02, 0x00, 0x00
+  COMMAND_END_MARKER, COMMAND_END_MARKER
 };
+//  CMD_DISPLAY_UPDATE_CONTROL, 0x02, 0x40, PARAM_SEL_SINGLE_CHIP, // Display update control
+//  CMD_BORDER_WAVEFORM, 0x01, PARAM_BORDER_FULL,                  // Border waveform for full refresh
+//  CMD_DATA_ENTRY_MODE, 0x01, PARAM_X_INC_Y_INC,                  // Data entry mode (X+ Y+)
+//  CMD_SET_X_ADDR, 0x02, 0x00, 0x31,                              // Set RAM X Address Start/End Pos (0 to 49 -> 400 pixels)
+//  CMD_SET_Y_ADDR, 0x04, 0x00, 0x00, 0x2b, 0x01,                  // Set RAM Y Address Start/End Pos (0 to 299 -> 300 pixels)
+//  CMD_SET_X_COUNTER, 0x01, 0x00,                                 // Set RAM X Address counter
+//  CMD_SET_Y_COUNTER, 0x02, 0x00, 0x00,                           // Set RAM Y Address counter
+//  COMMAND_END_MARKER, COMMAND_END_MARKER                         // End marker
+// };
 
-const uint8_t display_start_sequence_5p79in[] = {
-  CMD_SOFT_RESET, DELAY_FLAG, 10,                        // Soft reset and 10ms delay
-  // Do not set MUX. Not sure why, but it causes issues with the 5.79in display.
-  // Set up the RAM area for the primary controller
-  CMD_DATA_ENTRY_MODE | CMD_TARGET_PRIMARY, 0x01, PARAM_X_INC_Y_INC, // This panel goes from left to right.
-  CMD_SET_X_ADDR | CMD_TARGET_PRIMARY, 0x02, 0x00, 0x31,             // Set RAM X Address Start/End Pos (0 to 49 -> 400 pixels)
-  CMD_SET_Y_ADDR | CMD_TARGET_PRIMARY, 0x04, 0x00, 0x00, 0x0f, 0x01, // Set RAM Y Address Start/End Pos (0 to 271 -> 272 pixels)
-  // Set up the RAM area for the secondary controller
-  CMD_DATA_ENTRY_MODE | CMD_TARGET_SECONDARY, 0x01, PARAM_X_DEC_Y_INC, // This panel goes from right to left.
-  CMD_SET_X_ADDR | CMD_TARGET_SECONDARY, 0x02, 0x31, 0x00,             // Set RAM X Address Start/End Pos (49 to 0 -> 400 pixels)
-  CMD_SET_Y_ADDR | CMD_TARGET_SECONDARY, 0x04, 0x00, 0x00, 0x0f, 0x01, // Set RAM Y Address Start/End Pos (0 to 271 -> 272 pixels)
-  COMMAND_END_MARKER, COMMAND_END_MARKER                 // End marker
-};
+// const uint8_t display_start_sequence_5p79in[] = {
+//  CMD_SOFT_RESET, DELAY_FLAG, 10,                        // Soft reset and 10ms delay
+//  // Do not set MUX. Not sure why, but it causes issues with the 5.79in display.
+//  // Set up the RAM area for the primary controller
+//  CMD_DATA_ENTRY_MODE | CMD_TARGET_PRIMARY, 0x01, PARAM_X_INC_Y_INC, // This panel goes from left to right.
+//  CMD_SET_X_ADDR | CMD_TARGET_PRIMARY, 0x02, 0x00, 0x31,             // Set RAM X Address Start/End Pos (0 to 49 -> 400 pixels)
+//  CMD_SET_Y_ADDR | CMD_TARGET_PRIMARY, 0x04, 0x00, 0x00, 0x0f, 0x01, // Set RAM Y Address Start/End Pos (0 to 271 -> 272 pixels)
+//  // Set up the RAM area for the secondary controller
+//  CMD_DATA_ENTRY_MODE | CMD_TARGET_SECONDARY, 0x01, PARAM_X_DEC_Y_INC, // This panel goes from right to left.
+//  CMD_SET_X_ADDR | CMD_TARGET_SECONDARY, 0x02, 0x31, 0x00,             // Set RAM X Address Start/End Pos (49 to 0 -> 400 pixels)
+//  CMD_SET_Y_ADDR | CMD_TARGET_SECONDARY, 0x04, 0x00, 0x00, 0x0f, 0x01, // Set RAM Y Address Start/End Pos (0 to 271 -> 272 pixels)
+//  COMMAND_END_MARKER, COMMAND_END_MARKER                 // End marker
+// };
 
 const uint8_t display_stop_sequence[] = {
   CMD_DEEP_SLEEP, 0x01, PARAM_DEEP_SLEEP_MODE,       // Deep sleep mode
@@ -539,17 +548,17 @@ void CrowPanelEPaper::draw_absolute_pixel_internal(int x, int y, Color color) {
 }
 
 // ========================================================
-// CrowPanelEPaper4P2In Implementation (4.2" B/W display)
+// CrowPanelEPaper2in13 Implementation (2.13" B/W display)
 // ========================================================
 
-void CrowPanelEPaper4P2In::initialize() {
-  ESP_LOGD(TAG, "Initializing CrowPanel 4.2in display");
+void CrowPanelEPaper2in13::initialize() {
+  ESP_LOGD(TAG, "Initializing CrowPanel 2.13in display");
 
   // Send initialization sequence using the predefined commands
   this->send_command_sequence_(display_start_sequence);
 }
 
-void CrowPanelEPaper4P2In::prepare_for_update_(UpdateMode mode) {
+void CrowPanelEPaper2in13::prepare_for_update_(UpdateMode mode) {
   if (mode == UpdateMode::FULL) {
     ESP_LOGD(TAG, "Preparing for FULL update mode");
     
@@ -575,7 +584,7 @@ void CrowPanelEPaper4P2In::prepare_for_update_(UpdateMode mode) {
   }
 }
 
-void CrowPanelEPaper4P2In::display() {
+void CrowPanelEPaper2in13::display() {
   ESP_LOGD(TAG, "E-Paper display refresh starting");
   // Set the display mode based on update type
   UpdateMode mode = this->is_full_update_ ? UpdateMode::FULL : UpdateMode::PARTIAL;
@@ -593,16 +602,16 @@ void CrowPanelEPaper4P2In::display() {
   this->data_send_index_ = 0;
 }
 
-void CrowPanelEPaper4P2In::deep_sleep() {
+void CrowPanelEPaper2in13::deep_sleep() {
   ESP_LOGD(TAG, "Entering deep sleep mode");
   
   // Send deep sleep sequence
   this->send_command_sequence_(display_stop_sequence);
 }
 
-void CrowPanelEPaper4P2In::dump_config() {
+void CrowPanelEPaper2in13::dump_config() {
   LOG_DISPLAY("", "CrowPanel E-Paper", this);
-  ESP_LOGCONFIG(TAG, "  Model: 4.2in");
+  ESP_LOGCONFIG(TAG, "  Model: 2.13in");
   LOG_PIN("  Reset Pin: ", this->reset_pin_);
   LOG_PIN("  DC Pin: ", this->dc_pin_);
   LOG_PIN("  Busy Pin: ", this->busy_pin_);
