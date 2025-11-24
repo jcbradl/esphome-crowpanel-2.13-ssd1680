@@ -127,7 +127,7 @@ class CrowPanelEPaper : public CrowPanelEPaperBase {
   int get_height_internal() override;
 };
 
-class CrowPanelEPaper : public CrowPanelEPaper {
+class CrowPanelEPaper2in13 : public CrowPanelEPaper {
  public:
   void initialize() override;
   void display() override;
