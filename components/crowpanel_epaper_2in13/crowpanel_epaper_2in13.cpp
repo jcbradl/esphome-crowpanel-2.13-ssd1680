@@ -46,11 +46,11 @@ static const uint8_t PARAM_SEL_CASCADE = 0x10;
 const uint8_t display_start_sequence_2in13[] = {
   CMD_SOFT_RESET,                                                // Soft reset
   CMD_SET_MUX, 0x03, 0xF9, 0x00, 0x00,                            // Set MUX as 250
-  CMD_DATA_ENTRY_MODE, 0x01, 0x03,                          // something else
+  CMD_DISPLAY_UPDATE_CONTROL, 0x02, 0x40, PARAM_SEL_SINGLE_CHIP,
+  CMD_DATA_ENTRY_MODE, 0x01, PARAM_X_INC_Y_INC,                          // something else
   CMD_SET_X_ADDR, 0x02, 0x00, 0x0F,                          // x
   CMD_SET_Y_ADDR, 0x04, 0x00, 0xF9, 0x00,                    // ramy 
-  CMD_BORDER_WAVEFORM, 0x01, 0x01,
- // CMD_SET_TEMP_SENSOR, 0x01, 0x80,
+  CMD_BORDER_WAVEFORM, 0x01, PARAM_BORDER_FULL,
   CMD_SET_X_COUNTER, 0x01, 0x00,
   CMD_SET_Y_COUNTER, 0x02, 0x00, 0x00,
   COMMAND_END_MARKER, COMMAND_END_MARKER
